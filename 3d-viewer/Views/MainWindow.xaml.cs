@@ -9,7 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace _3d_viewer
+namespace _3d_viewer.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

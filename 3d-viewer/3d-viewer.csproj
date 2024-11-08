@@ -14,9 +14,4 @@
     <PackageReference Include="HelixToolkit.Wpf" Version="2.25.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
 </Project>
