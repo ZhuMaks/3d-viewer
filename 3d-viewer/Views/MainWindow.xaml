@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:_3d_viewer.ViewModels"
         xmlns:helix="http://helix-toolkit.org/wpf"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="3D Viewer" Height="450" Width="800">
 
     <Window.DataContext>
@@ -11,7 +12,6 @@
     </Window.DataContext>
 
     <Grid>
-        <!-- HelixViewport3D для відображення 3D-об'єктів -->
         <helix:HelixViewport3D x:Name="helixViewport" ZoomExtentsWhenLoaded="True">
             <helix:HelixViewport3D.Camera>
                 <PerspectiveCamera Position="0,0,5" LookDirection="0,0,-1" UpDirection="0,1,0" FieldOfView="45"/>
@@ -23,5 +23,9 @@
         <!-- Кнопка для завантаження моделі -->
         <Button Content="Load Model" Command="{Binding LoadModelCommand}" 
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+
+        <!-- ColorPicker для вибору кольору -->
+        <xctk:ColorPicker SelectedColor="{Binding ModelColor, Mode=TwoWay}" 
+                          HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100,10,0,0" Width="120"/>
     </Grid>
 </Window>

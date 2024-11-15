@@ -1,13 +1,14 @@
-﻿// ViewModels/ViewerViewModel.cs
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using Microsoft.Win32;
 using ViewerApp.Models;
 using ViewerApp.ViewModels;
+using Xceed.Wpf.Toolkit; // Додайте це для доступу до ColorPicker
 
 namespace _3d_viewer.ViewModels
 {
@@ -35,7 +36,19 @@ namespace _3d_viewer.ViewModels
             }
         }
 
-        // Команда для завантаження 3D-моделі
+        private Color _modelColor = Colors.Gray; // Колір моделі за замовчуванням
+        public Color ModelColor
+        {
+            get => _modelColor;
+            set
+            {
+                _modelColor = value;
+                ChangeModelColor(value);
+                OnPropertyChanged();
+            }
+        }
+
+        // Команди для завантаження моделі та вибору кольору
         public ICommand LoadModelCommand { get; }
 
         public ViewerViewModel()
@@ -45,14 +58,12 @@ namespace _3d_viewer.ViewModels
 
         private void LoadModel()
         {
-            // Використовуємо OpenFileDialog для вибору файлу моделі
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "OBJ Files (*.obj)|*.obj|FBX Files (*.fbx)|*.fbx|STL Files (*.stl)|*.stl|All Files (*.*)|*.*",
                 Title = "Select a 3D Model File"
             };
 
-            // Перевіряємо, чи був файл вибраний користувачем
             if (openFileDialog.ShowDialog() == true)
             {
                 try
@@ -64,8 +75,22 @@ namespace _3d_viewer.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    // Обробка помилок, наприклад, показ повідомлення користувачу
                     System.Windows.MessageBox.Show($"Error loading model: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ChangeModelColor(Color color)
+        {
+            var colorBrush = new SolidColorBrush(color);
+            if (LoadedModel is Model3DGroup modelGroup)
+            {
+                foreach (var model in modelGroup.Children)
+                {
+                    if (model is GeometryModel3D geometryModel)
+                    {
+                        geometryModel.Material = new DiffuseMaterial(colorBrush);
+                    }
                 }
             }
         }
