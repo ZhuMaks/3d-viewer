@@ -1,20 +1,21 @@
-﻿using System;
+﻿using HelixToolkit.Wpf;
+using Microsoft.Win32;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using HelixToolkit.Wpf;
-using Microsoft.Win32;
+using System.Windows.Media;
 using ViewerApp.Models;
 using ViewerApp.ViewModels;
-using Xceed.Wpf.Toolkit; // Додайте це для доступу до ColorPicker
 
 namespace _3d_viewer.ViewModels
 {
     public class ViewerViewModel : INotifyPropertyChanged
     {
+        private readonly ModelImporter _modelImporter; // Direct use of ModelImporter
         private MeshModel _currentModel;
+
         public MeshModel CurrentModel
         {
             get => _currentModel;
@@ -26,6 +27,7 @@ namespace _3d_viewer.ViewModels
         }
 
         private Model3D _loadedModel;
+
         public Model3D LoadedModel
         {
             get => _loadedModel;
@@ -36,7 +38,8 @@ namespace _3d_viewer.ViewModels
             }
         }
 
-        private Color _modelColor = Colors.Gray; // Колір моделі за замовчуванням
+        private Color _modelColor = Colors.Gray; // Default model color
+
         public Color ModelColor
         {
             get => _modelColor;
@@ -48,15 +51,18 @@ namespace _3d_viewer.ViewModels
             }
         }
 
-        // Команди для завантаження моделі та вибору кольору
+        // Command for loading models
         public ICommand LoadModelCommand { get; }
 
+        // Constructor
         public ViewerViewModel()
         {
+            _modelImporter = new ModelImporter(); // Use ModelImporter directly
             LoadModelCommand = new RelayCommand(LoadModel);
         }
 
-        private void LoadModel()
+        // Loads a model using a file dialog
+        internal void LoadModel()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -68,18 +74,30 @@ namespace _3d_viewer.ViewModels
             {
                 try
                 {
-                    var modelImporter = new ModelImporter();
-                    var model = modelImporter.Load(openFileDialog.FileName);
+                    // Load model directly
+                    var model = _modelImporter.Load(openFileDialog.FileName);
                     LoadedModel = model;
-                    CurrentModel = new MeshModel(model);
+
+                    // If it's a Model3DGroup, we can extract the first Model3D from it
+                    if (model is Model3DGroup modelGroup)
+                    {
+                        // Extract the first Model3D from the group
+                        CurrentModel = new MeshModel(modelGroup.Children.FirstOrDefault() as Model3D);
+                    }
+                    else
+                    {
+                        CurrentModel = new MeshModel(model);
+                    }
                 }
                 catch (Exception ex)
                 {
+                    // Show error message if loading fails
                     System.Windows.MessageBox.Show($"Error loading model: {ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
         }
 
+        // Change the color of the loaded model
         private void ChangeModelColor(Color color)
         {
             var colorBrush = new SolidColorBrush(color);
@@ -95,7 +113,9 @@ namespace _3d_viewer.ViewModels
             }
         }
 
+        // PropertyChanged event for notifying UI about property changes
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
